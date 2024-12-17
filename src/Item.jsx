@@ -1,27 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 
-const Item = ({ id, title, price, image, amount, updateCart, removeItem }) => {
-  const [quantity, setQuantity] = useState(amount);
-
-  // Povećaj količinu
-  const increaseQuantity = () => {
-    setQuantity((prev) => prev + 1);
-    updateCart(1, price);
-  };
-
-  // Smanji količinu
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity((prev) => prev - 1);
-      updateCart(-1, price);
-    }
-  };
-
-  // Ukloni ceo item
-  const handleRemove = () => {
-    removeItem(id, quantity, price); // Prosleđuje ID, količinu i cenu
-  };
-
+const Item = ({
+  id,
+  title,
+  price,
+  image,
+  amount,
+  removeItem,
+  increaseQuantity,
+  decreaseQuantity,
+}) => {
   return (
     <div className="item-card">
       <img src={image} alt={title} className="item-image" />
@@ -30,7 +18,7 @@ const Item = ({ id, title, price, image, amount, updateCart, removeItem }) => {
         <p className="item-price">${price}</p>
         <p
           className="remove-item"
-          onClick={handleRemove}
+          onClick={() => removeItem(id)}
           style={{ cursor: "pointer", color: "red" }}
         >
           REMOVE
@@ -40,7 +28,7 @@ const Item = ({ id, title, price, image, amount, updateCart, removeItem }) => {
         <button onClick={increaseQuantity} className="arrow-up">
           ▲
         </button>
-        <p>{quantity}</p>
+        <p>{amount}</p>
         <button onClick={decreaseQuantity} className="arrow-down">
           ▼
         </button>

@@ -6,10 +6,7 @@ import Item from "./Item";
 
 function App() {
   const [data, setData] = useState([]);
-  const [cartNum, setCartNum] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
 
-  // Fetch podataka
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -18,15 +15,6 @@ function App() {
         );
         const data = await response.json();
         setData(data);
-
-        // Početne vrednosti
-        const totalItems = data.reduce((total, item) => total + item.amount, 0);
-        const totalCost = data.reduce(
-          (total, item) => total + item.amount * item.price,
-          0
-        );
-        setCartNum(totalItems);
-        setTotalPrice(totalCost);
       } catch (error) {
         console.error("Error fetching data", error);
       }
@@ -35,24 +23,36 @@ function App() {
     fetchData();
   }, []);
 
-  // Ažuriranje ukupne količine i cene
-  const updateCart = (changeInQuantity, price) => {
-    setCartNum((prev) => prev + changeInQuantity);
-    setTotalPrice((prev) => prev + changeInQuantity * price);
+  const totalItems = data.reduce((total, item) => total + item.amount, 0);
+  const totalCost = data.reduce(
+    (total, item) => total + item.amount * item.price,
+    0
+  );
+
+  const removeItem = (id) => {
+    setData((prevData) => prevData.filter((item) => item.id !== id));
   };
 
-  // Brisanje celog itema
-  const removeItem = (id, quantity, price) => {
-    setData((prevData) => prevData.filter((item) => item.id !== id)); // Uklanja item
-    setCartNum((prev) => prev - quantity);
-    setTotalPrice((prev) => prev - quantity * price);
-  };
-
-  // Brisanje svih itema
   const clearBag = () => {
-    setData([]); // Briše sve iteme
-    setCartNum(0); // Resetuje ukupan broj artikala
-    setTotalPrice(0); // Resetuje ukupnu cenu
+    setData([]);
+  };
+
+  const increaseAmount = (id) => {
+    setData((prevData) =>
+      prevData.map((item) =>
+        item.id === id ? { ...item, amount: item.amount + 1 } : item
+      )
+    );
+  };
+
+  const decreaseAmount = (id) => {
+    setData((prevData) =>
+      prevData.map((item) =>
+        item.id === id && item.amount > 1
+          ? { ...item, amount: item.amount - 1 }
+          : item
+      )
+    );
   };
 
   return (
@@ -61,13 +61,13 @@ function App() {
         <h1>YOUR BAG</h1>
         <div style={{ position: "relative" }}>
           {" "}
-          {/* Pozicija kontejnera za korpu */}
+          {}
           <img
             src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png"
             alt="cart"
             className="cart-icon"
           />
-          <p className="cart-number">{cartNum}</p>
+          <p className="cart-number">{totalItems}</p>
         </div>
       </div>
 
@@ -81,8 +81,9 @@ function App() {
               price={item.price}
               image={item.img}
               amount={item.amount}
-              updateCart={updateCart}
               removeItem={removeItem}
+              increaseQuantity={() => increaseAmount(item.id)}
+              decreaseQuantity={() => decreaseAmount(item.id)}
             />
           ))
         ) : (
@@ -92,7 +93,7 @@ function App() {
 
       {data.length > 0 && (
         <div className="footer">
-          <h2>Total Price: ${totalPrice.toFixed(2)}</h2>
+          <h2>Total Price: ${totalCost.toFixed(2)}</h2>
           <button onClick={clearBag} className="clear-bag-btn">
             Clear Bag
           </button>
